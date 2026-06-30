@@ -5,6 +5,8 @@ from typing import Iterable
 
 import pandas as pd
 
+from .normalization import normalize_county_name, normalize_municipality_name
+
 
 @dataclass(frozen=True)
 class ValidationResult:
@@ -29,5 +31,10 @@ def normalize_text_columns(df: pd.DataFrame, columns: Iterable[str]) -> pd.DataF
     normalized = df.copy()
     for column in columns:
         if column in normalized.columns:
-            normalized[column] = normalized[column].astype("string").str.strip()
+            if column == "Kommun":
+                normalized[column] = normalized[column].map(normalize_municipality_name).astype("string")
+            elif column == "Län":
+                normalized[column] = normalized[column].map(normalize_county_name).astype("string")
+            else:
+                normalized[column] = normalized[column].astype("string").str.strip()
     return normalized
